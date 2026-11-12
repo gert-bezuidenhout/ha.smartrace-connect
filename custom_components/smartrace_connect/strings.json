@@ -1,0 +1,32 @@
+{
+  "title": "SmartRace Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to SmartRace",
+        "description": "Start the Connect Server in SmartRace, then enter its address and port. Commands are sent directly over your local network.",
+        "data": {
+          "host": "SmartRace IP address or hostname",
+          "port": "Connect Server port"
+        }
+      },
+      "reconfigure": {
+        "title": "Update SmartRace connection",
+        "description": "Change the server address or port. The new connection is checked before saving. Your existing buttons and automations are retained.",
+        "data": {
+          "host": "SmartRace IP address or hostname",
+          "port": "Connect Server port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect. Check the address, port, network access, and that SmartRace Connect Server is running.",
+      "invalid_host": "Enter only an IPv4 address or hostname, without ws://, a port, or a path.",
+      "already_configured": "This address and port are already used by another SmartRace entry."
+    },
+    "abort": {
+      "already_configured": "This SmartRace server is already configured.",
+      "reconfigure_successful": "SmartRace connection updated."
+    }
+  }
+}

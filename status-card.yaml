@@ -1,0 +1,8 @@
+type: entities
+title: SmartRace server
+show_header_toggle: false
+entities:
+  - entity: binary_sensor.smartrace_connect_connection
+    name: Connection
+  - entity: sensor.smartrace_connect_server_address
+    name: Server address

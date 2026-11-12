@@ -1,0 +1,14 @@
+{
+  "domain": "smartrace_connect",
+  "name": "SmartRace Connect",
+  "version": "1.0.7",
+  "config_flow": true,
+  "documentation": "https://github.com/gert-bezuidenhout/ha.smartrace-connect",
+  "iot_class": "local_push",
+  "integration_type": "device",
+  "codeowners": [
+    "@gert-bezuidenhout"
+  ],
+  "requirements": [],
+  "issue_tracker": "https://github.com/gert-bezuidenhout/ha.smartrace-connect/issues"
+}

@@ -1,0 +1,36 @@
+type: grid
+columns: 2
+square: false
+cards:
+  - type: button
+    entity: button.smartrace_connect_start
+    name: Start
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.smartrace_connect_start
+  - type: button
+    entity: button.smartrace_connect_stop
+    name: Stop
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.smartrace_connect_stop
+  - type: button
+    entity: button.smartrace_connect_esc
+    name: ESC
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.smartrace_connect_esc
+  - type: button
+    entity: button.smartrace_connect_vsc
+    name: VSC
+    tap_action:
+      action: perform-action
+      perform_action: button.press
+      target:
+        entity_id: button.smartrace_connect_vsc
