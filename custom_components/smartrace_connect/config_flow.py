@@ -1,6 +1,7 @@
 """Set up SmartRace from the Home Assistant interface."""
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .client import SmartRaceClient, CONNECTION_ERRORS
 
@@ -18,6 +19,11 @@ def valid_host(value):
 
 class SmartRaceConfigFlow(config_entries.ConfigFlow, domain="smartrace_connect"):
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return SmartRaceOptionsFlow()
 
     async def async_step_reconfigure(self, user_input=None):
         """Update the connection while retaining the entry and entity identities."""
@@ -81,5 +87,47 @@ class SmartRaceConfigFlow(config_entries.ConfigFlow, domain="smartrace_connect")
         return self.async_show_form(
             step_id="user",
             data_schema=DATA_SCHEMA,
+            errors=errors,
+        )
+
+
+class SmartRaceOptionsFlow(config_entries.OptionsFlow):
+    async def async_step_init(self, user_input=None):
+        """Update the connection while retaining the entry and entity identities."""
+        entry = self.config_entry
+        errors = {}
+        if user_input is not None:
+            try:
+                host = valid_host(user_input["host"])
+            except vol.Invalid:
+                errors["host"] = "invalid_host"
+            else:
+                port = user_input["port"]
+                unique_id = f"{host.lower()}:{port}"
+                if any(other.entry_id != entry.entry_id and (
+                    other.unique_id == unique_id or (
+                        other.data["host"].lower() == host.lower()
+                        and other.data["port"] == port
+                    )
+                ) for other in self.hass.config_entries.async_entries("smartrace_connect")):
+                    errors["base"] = "already_configured"
+                else:
+                    client = SmartRaceClient(async_get_clientsession(self.hass), host, port)
+                    try:
+                        await client.probe()
+                    except CONNECTION_ERRORS:
+                        errors["base"] = "cannot_connect"
+                    else:
+                        self.hass.config_entries.async_update_entry(
+                            entry, unique_id=unique_id,
+                            data={**entry.data, "host": host, "port": port},
+                        )
+                        await self.hass.config_entries.async_reload(entry.entry_id)
+                        return self.async_create_entry(title="", data=dict(entry.options))
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                DATA_SCHEMA, user_input if user_input is not None else entry.data
+            ),
             errors=errors,
         )

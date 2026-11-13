@@ -55,7 +55,7 @@ Check the actual entity ID on your device if you renamed it or Home Assistant as
 
 ESC and VSC are command buttons, not on/off switches. Their behaviour depends on SmartRace. A successful action means the command was sent, not that the app acknowledged execution. Commands are never queued or automatically retried, avoiding duplicate penalties or toggles after an uncertain connection.
 
-To change the server address or port, use **Reconfigure** on the integration entry. The connection is checked before the new settings are saved.
+To change the server address or port, use the **Configure** gear on the integration entry (the **Reconfigure** menu remains available). The connection is checked before the new settings are saved.
 
 ## Troubleshooting
 

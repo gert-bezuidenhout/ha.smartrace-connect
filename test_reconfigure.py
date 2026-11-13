@@ -33,7 +33,7 @@ class Client:
         probes.append(self.address)
         if self.fail: raise OSError("Offline")
 
-namespace = {"vol": vol, "config_entries": SimpleNamespace(ConfigFlow=Base),
+namespace = {"vol": vol, "callback": lambda func: func, "config_entries": SimpleNamespace(ConfigFlow=Base, OptionsFlow=Base),
              "SmartRaceClient": Client, "CONNECTION_ERRORS": (OSError,),
              "async_get_clientsession": lambda hass: None}
 exec(compile(tree, "config_flow.py", "exec"), namespace)
@@ -63,4 +63,40 @@ async def main():
     assert result["reason"] == "reconfigure_successful"
     print("PASS: form, validation, failed connection preserves settings, duplicates, successful update, unchanged address")
 
+async def options_tests():
+    entry.options = {"retained": True}
+    entry.data = {"host": "old", "port": 1234}
+    entry.unique_id = "old:1234"
+    reloads = []
+    async def reload(entry_id):
+        reloads.append(entry_id)
+        return True
+    options = namespace["SmartRaceConfigFlow"].async_get_options_flow(entry)
+    assert isinstance(options, namespace["SmartRaceOptionsFlow"])
+    options.config_entry = entry
+    options.hass = flow.hass
+    flow.hass.config_entries.async_entries = lambda domain: others
+    flow.hass.config_entries.async_reload = reload
+    options.async_create_entry = lambda **kwargs: kwargs
+    result = await options.async_step_init()
+    assert result["step_id"] == "init" and options.suggested == entry.data
+    result = await options.async_step_init({"host": "ws://bad", "port": 1234})
+    assert result["errors"] == {"host": "invalid_host"}
+    Client.fail = True
+    result = await options.async_step_init({"host": "new", "port": 4321})
+    assert result["errors"] == {"base": "cannot_connect"}
+    assert entry.data == {"host": "old", "port": 1234} and not reloads
+    Client.fail = False
+    others.append(SimpleNamespace(entry_id="other", unique_id="new:4321", data={"host": "new", "port": 4321}))
+    result = await options.async_step_init({"host": "NEW", "port": 4321})
+    assert result["errors"] == {"base": "already_configured"} and not reloads
+    others.pop()
+    result = await options.async_step_init({"host": " new ", "port": 4321})
+    assert result["data"] == {"retained": True}
+    assert entry.data == {"host": "new", "port": 4321}
+    assert entry.unique_id == "new:4321" and entry.entry_id == "stable-id"
+    assert reloads == ["stable-id"]
+    print("PASS: Configure form, failed connection, duplicate address, preserved identity/options, reload")
+
 asyncio.run(main())
+asyncio.run(options_tests())
