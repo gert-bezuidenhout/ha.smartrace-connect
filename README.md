@@ -1,5 +1,7 @@
 # SmartRace Connect for Home Assistant
 
+<img src="custom_components/smartrace_connect/brand/logo.png" alt="SmartRace Connect" width="128" height="128">
+
 [Home Assistant](https://www.home-assistant.io/) is an open-source platform that brings devices, dashboards and automations together, with an emphasis on local control and privacy.
 
 [SmartRace](https://www.smartrace.de/en/) is a slot-car racing app for lap counting, timing, driver and car management, practice, qualifying and races.
