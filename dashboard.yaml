@@ -1,6 +1,3 @@
-# Paste this entire file into one Manual dashboard card.
-# Uses standard Home Assistant cards; no custom frontend plugins required.
-# Check entity IDs if you renamed the integration or its entities.
 type: vertical-stack
 cards:
   - type: entities
@@ -18,7 +15,7 @@ cards:
     cards:
       - type: button
         entity: button.smartrace_connect_start
-        name: "Start"
+        name: Start
         icon: mdi:play
         icon_height: 36px
         show_state: false
@@ -31,7 +28,7 @@ cards:
           action: more-info
       - type: button
         entity: button.smartrace_connect_stop
-        name: "Stop"
+        name: Stop
         icon: mdi:stop
         icon_height: 36px
         show_state: false
@@ -44,7 +41,7 @@ cards:
           action: more-info
       - type: button
         entity: button.smartrace_connect_esc
-        name: "ESC"
+        name: ESC
         icon: mdi:car-emergency
         icon_height: 36px
         show_state: false
@@ -57,7 +54,7 @@ cards:
           action: more-info
       - type: button
         entity: button.smartrace_connect_vsc
-        name: "VSC"
+        name: VSC
         icon: mdi:car-speed-limiter
         icon_height: 36px
         show_state: false
@@ -74,14 +71,16 @@ cards:
       - entity: button.smartrace_connect_reload_weather_settings
         name: Reload weather settings
         action_name: Reload
-  - type: grid
+  - square: false
+    type: grid
     title: Time penalties (+5 seconds)
-    columns: 4
-    square: false
+    columns: 3
     cards:
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_1_penalty_5_seconds
-        name: "C1 +5 s"
+        name: Controller 1 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -92,9 +91,11 @@ cards:
             entity_id: button.smartrace_connect_controller_1_penalty_5_seconds
         hold_action:
           action: more-info
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_2_penalty_5_seconds
-        name: "C2 +5 s"
+        name: Controller 2 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -105,9 +106,11 @@ cards:
             entity_id: button.smartrace_connect_controller_2_penalty_5_seconds
         hold_action:
           action: more-info
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_3_penalty_5_seconds
-        name: "C3 +5 s"
+        name: Controller 3 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -118,9 +121,11 @@ cards:
             entity_id: button.smartrace_connect_controller_3_penalty_5_seconds
         hold_action:
           action: more-info
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_4_penalty_5_seconds
-        name: "C4 +5 s"
+        name: Controller 4 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -131,9 +136,11 @@ cards:
             entity_id: button.smartrace_connect_controller_4_penalty_5_seconds
         hold_action:
           action: more-info
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_5_penalty_5_seconds
-        name: "C5 +5 s"
+        name: Controller 5 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -144,9 +151,11 @@ cards:
             entity_id: button.smartrace_connect_controller_5_penalty_5_seconds
         hold_action:
           action: more-info
-      - type: button
+      - show_name: true
+        show_icon: true
+        type: button
         entity: button.smartrace_connect_controller_6_penalty_5_seconds
-        name: "C6 +5 s"
+        name: Controller 6 +5 s
         icon: mdi:timer-plus
         icon_height: 30px
         show_state: false
@@ -155,31 +164,5 @@ cards:
           perform_action: button.press
           target:
             entity_id: button.smartrace_connect_controller_6_penalty_5_seconds
-        hold_action:
-          action: more-info
-      - type: button
-        entity: button.smartrace_connect_controller_7_penalty_5_seconds
-        name: "C7 +5 s"
-        icon: mdi:timer-plus
-        icon_height: 30px
-        show_state: false
-        tap_action:
-          action: perform-action
-          perform_action: button.press
-          target:
-            entity_id: button.smartrace_connect_controller_7_penalty_5_seconds
-        hold_action:
-          action: more-info
-      - type: button
-        entity: button.smartrace_connect_controller_8_penalty_5_seconds
-        name: "C8 +5 s"
-        icon: mdi:timer-plus
-        icon_height: 30px
-        show_state: false
-        tap_action:
-          action: perform-action
-          perform_action: button.press
-          target:
-            entity_id: button.smartrace_connect_controller_8_penalty_5_seconds
         hold_action:
           action: more-info
