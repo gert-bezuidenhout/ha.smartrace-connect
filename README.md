@@ -1,71 +1,83 @@
 # SmartRace Connect for Home Assistant
 
-An unofficial custom integration. Home Assistant sends JSON directly to SmartRace's Connect Server using a WebSocket. No MQTT, Node-RED, additional server, browser permission changes, or extra Python packages are required.
+[Home Assistant](https://www.home-assistant.io/) is an open-source platform that brings devices, dashboards and automations together, with an emphasis on local control and privacy.
 
-## Install
+[SmartRace](https://www.smartrace.de/en/) is a slot-car racing app for lap counting, timing, driver and car management, practice, qualifying and races.
 
-1. Unzip this package on your computer.
-2. Copy the entire `smartrace_connect` folder inside `custom_components` into Home Assistant's `/config/custom_components/` folder. Create `custom_components` if needed. The result must be `/config/custom_components/smartrace_connect/manifest.json`, with the other Python files beside it. Use your existing Samba share, Studio Code Server, or file editor that supports folder uploads. Do not put the folder under `www`.
-3. Restart Home Assistant.
-4. In the main SmartRace app, enable/start **SmartRace Connect Server**. Its paid server add-on must be available. Note the IP address and port shown by SmartRace; there is deliberately no assumed default port.
-5. In Home Assistant open **Settings > Devices & services > Add integration**, search for **SmartRace Connect**, and enter that IP address and port. Enter only the address in the address field, without `ws://` or the port.
-6. Open the new SmartRace device. Try a button while watching SmartRace. Start with the track idle and use Start/Stop only when ready to test their effects.
+This is an independent community integration maintained by Gert Bezuidenhout, not an official SmartRace or Home Assistant product.
 
-If the integration is missing from the list, refresh your browser after the Home Assistant restart and check Settings > System > Logs for `smartrace_connect` errors.
+Send race-control commands from Home Assistant to SmartRace over your local network.
 
-## Included controls
+## What it does
 
-- Start, Stop, ESC, VSC, and Reload weather settings.
-- A five-second time penalty button for each controller, 1–8.
+- Start, Stop, ESC, VSC and reload-weather buttons.
+- Five-second time-penalty buttons for controllers 1–8.
+- Connection indicator and server-address sensor.
+- Automatic reconnection and UI reconfiguration when the server address changes.
 
-These send the exact command forms in the official demo. ESC/VSC are command buttons rather than on/off switches: the public example does not establish separate on/off commands. Race-state behavior and required feature add-ons are controlled by SmartRace. Stop is not represented as an emergency power cutoff.
+**Connect sends commands.** [SmartRace Receiver](https://github.com/gert-bezuidenhout/ha.smartrace-receiver) receives race data. They are separate integrations and can be used together.
 
-Analog sensor injection is intentionally excluded from the normal race dashboard; it is not required to control a digital race.
+## Install with HACS
 
-## Dashboard
+These integrations have not yet been accepted into the default HACS Marketplace catalogue. For now, install through HACS as a custom repository:
 
-Edit a dashboard, add a **Manual** card, and paste `dashboard.yaml`. The example assumes the generated entity IDs are `button.smartrace_start`, `button.smartrace_stop`, `button.smartrace_esc`, and `button.smartrace_vsc`. Confirm them on your SmartRace device page and replace them in the example if Home Assistant assigned different IDs. You can also add the buttons directly using the dashboard editor.
+1. Install and configure [HACS](https://www.hacs.xyz/docs/use/) in Home Assistant if needed.
+2. Open HACS, open its menu and select **Custom repositories**.
+3. Add `https://github.com/gert-bezuidenhout/ha.smartrace-connect` with type **Integration**.
+4. Find **SmartRace Connect**, download it and restart Home Assistant.
+5. Open **Settings > Devices & services > Add integration** and select **SmartRace Connect**.
 
-## Automations
+Once the repository is accepted into the default catalogue, the custom-repository step will no longer be needed. HACS downloads the integration; adding it under Devices & services completes setup. No configuration.yaml changes are required.
 
-Use **Button: Press** as an action and select the desired SmartRace button. Equivalent action YAML:
+## Configure SmartRace
+
+Enable **SmartRace Connect Server** in the main SmartRace app; its required server add-on must be available. Enter the IP address and port shown by SmartRace in the integration setup form. Enter the address without a scheme or port in the address field.
+
+Home Assistant must be able to reach that address on the local network. No MQTT broker or additional intermediary server is needed.
+
+## Use the controls
+
+Open the SmartRace Connect device in Home Assistant and press a button, or add buttons using the dashboard editor. Optional examples are in [dashboard.yaml](dashboard.yaml) and [status-card.yaml](status-card.yaml).
+
+Automations use **Button: Press**, for example:
 
 ```yaml
 action: button.press
 target:
-  entity_id: button.smartrace_start
+  entity_id: button.smartrace_connect_start
 ```
 
-No `configuration.yaml` changes are needed.
+Check the actual entity ID on your device if you renamed it or Home Assistant assigned a different one.
 
-## Connection and delivery
+## Connection behaviour
 
-The integration opens one persistent WebSocket connection at startup and reuses it for every button press. Incoming messages are drained and standard WebSocket heartbeat checks detect an unresponsive server. After a disconnect it reconnects automatically, with retry delays increasing from one second to a maximum of 30 seconds. Removing/reloading the integration, changing its address, or stopping Home Assistant closes the connection cleanly. The official demo sends commands without an application login or initial registration, and this integration follows it. Commands are serialized and never automatically retried, to avoid repeating a penalty or toggle after uncertain delivery. A successful press means the message was sent, not that SmartRace confirmed execution: the public demo specifies no command acknowledgement. There is no race-state sensor in this package. A Connection binary sensor tracks the live WebSocket and a Server address sensor shows the configured endpoint. Button presses while disconnected report an error; commands are never queued for later execution.
+ESC and VSC are command buttons, not on/off switches. Their behaviour depends on SmartRace. A successful action means the command was sent, not that the app acknowledged execution. Commands are never queued or automatically retried, avoiding duplicate penalties or toggles after an uncertain connection.
 
-Home Assistant must reach the SmartRace device on its LAN IP and displayed port; guest Wi-Fi isolation can prevent this. Reserve the SmartRace device's IP in your router if possible. Commands use unencrypted `ws://` on your local network. Do not expose this server to the internet. Browser mixed-content restrictions do not apply to these server-side connections.
+To change the server address or port, use **Reconfigure** on the integration entry. The connection is checked before the new settings are saved.
 
-If the address or port changes, open Settings > Devices & services > SmartRace Connect, open the three-dot menu for the SmartRace entry, and select Reconfigure. Enter the new address and port, then submit. The new connection is checked before saving and the integration reloads automatically. Existing buttons, dashboard references, and automations are retained. If the check fails, the saved connection remains unchanged.
+## Troubleshooting
 
-## Validation and limits
+- **Cannot connect:** ensure Connect Server is running and check its current address/port. Guest-network isolation can prevent access.
+- **Command failed:** check SmartRace before retrying; delivery may be uncertain.
+- **Integration not listed:** restart Home Assistant after download, refresh the browser and check its logs.
+- **Need race data:** install Receiver separately; Connect does not supply lap or race-status data.
 
-The package includes transport tests using a local mock WebSocket server. It has not been tested inside your Home Assistant installation or against your live SmartRace server. A listening WebSocket endpoint is checked during setup; this is a reachability check, not a verified SmartRace identity handshake.
+The connection uses local, unencrypted WebSocket traffic. Keep the server on a trusted network. Connection testing checks reachability, not a SmartRace identity handshake.
 
-Protocol reference: https://tools.smartrace.de/websocket-client/ and its linked `js/main.js`.
-Manual: https://www.smartrace.de/en/the-smartrace-manual/websocket-client-demo/
+Protocol reference: [SmartRace WebSocket client documentation](https://www.smartrace.de/en/the-smartrace-manual/websocket-client-demo/).
 
-## Remove
+## Updates and removal
 
-Remove the integration under Devices & services, delete `/config/custom_components/smartrace_connect`, and restart Home Assistant.
+Download updates through HACS and restart Home Assistant. Keep the existing integration entry when updating. Older installations should read [MIGRATION.md](MIGRATION.md).
 
-## Upgrade from smartrace_control (v1.0.6 or earlier)
+To uninstall, remove the integration entry under Devices & services, remove its download in HACS and restart Home Assistant. Check any automations that used its entities.
 
-This version changes the integration domain as well as its folder name. Home Assistant does not automatically move the old integration entry to a new domain. Do not simply rename the installed folder while leaving the old entry configured.
+## Support and project files
 
-1. Make a Home Assistant backup. Note the existing server address/port and entity IDs from the SmartRace device page, including any disabled entities or customizations you want to retain.
-2. While the old integration files are still installed, remove its SmartRace entry in Settings > Devices & services. This stops its connection and removes its registered entities. Historical data migration is not included.
-3. Remove the old `/config/custom_components/smartrace_control/` folder. Copy this package's `smartrace_connect` folder to `/config/custom_components/smartrace_connect/`.
-4. Restart Home Assistant.
-5. Add **SmartRace Connect** again with the recorded address and port.
-6. Compare the new entity IDs with your recorded IDs. Use each entity's settings to restore its previous entity ID where needed, then verify dashboard and automation references. New default entity IDs may start with `smartrace_connect_` because the device is named SmartRace Connect. The included YAML examples use that prefix; verify the actual IDs.
+Report problems through [GitHub Issues](https://github.com/gert-bezuidenhout/ha.smartrace-connect/issues), including Home Assistant/integration versions, steps to reproduce and redacted logs.
 
-The connection, server-address sensors, persistent WebSocket, reconfiguration, supplied logo, and device attribution are included. Stored entry/device identifiers change with this domain migration; retaining the old config entry, history links, and device-based automation references is not automatic. Update device-based automations to select the new device.
+See [repository file guide](docs/FILES.md) for what is included, and [Marketplace preparation](docs/HACS_SUBMISSION.md) for the maintainer checklist.
+
+## Licence
+
+Project code is licensed under the [MIT licence](LICENSE), copyright Gert Bezuidenhout. Product names and third-party branding remain the property of their respective owners; this project does not imply their endorsement.
